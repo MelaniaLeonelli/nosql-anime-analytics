@@ -51,3 +51,31 @@ Per estrarre insight statistici dal database e valutare la flessibilità del mod
 ### 3. Cross-Analytics Geografica degli Utenti
 * **Obiettivo concettuale:** Analizzare la distribuzione geografica degli utenti, estraendo le 5 località con la maggiore densità di profili registrati e valutando la propensione al voto medio degli utenti di quelle aree.
 * **Operatori utilizzati:** `$match` (per ignorare i dati mancanti), `$group` (per contare gli utenti e fare la media del loro `stats_mean_score`), `$sort` e `$limit`.
+
+---
+
+##  Issue #5: Creazione Indici di Ottimizzazione e Esecuzione Benchmark
+
+Per valutare l'efficienza del database NoSQL e l'impatto degli indici sulle performance delle Aggregation Pipeline, è stato implementato lo script `query_benchmark.py`. Lo script esegue un test comparativo calcolando il tempo medio di esecuzione (su 10 iterazioni stabili) prima e dopo l'applicazione degli indici.
+
+###  Strategia di Indicizzazione
+Sono stati introdotti i seguenti indici mirati sulle collezioni:
+1. **`animes` (Campo singolo):** `genres` (ASC) per ottimizzare l'operazione di `$unwind`.
+2. **`animes` (Composto):** `studio` (ASC) e `score` (DESC) per supportare il raggruppamento e l'ordinamento degli studi di produzione.
+3. **`users` (Campo singolo):** `location` (ASC) per velocizzare il filtraggio geografico iniziale.
+
+###  Risultati del Benchmark (Dataset di Campionamento)
+
+| Query | Tempo Medio Pre-Indice | Tempo Medio Post-Indice | Delta % |
+| :--- | :--- | :--- | :--- |
+| **Q1 (Generi)** | 12.22 ms | 12.31 ms | -0.7% |
+| **Q2 (Studi)** | 8.73 ms | 16.50 ms | -89.0% |
+| **Q3 (Utenti)** | 153.82 ms | 249.38 ms | -62.1% |
+
+### Analisi Critica dei Risultati (Considerazioni per l'Esame)
+L'apparente peggioramento prestazionale registrato nei test evidenzia un comportamento tipico ed ampiamente documentato dei DBMS documentali:
+* **Overhead su Piccoli Dataset:** Lavorando su un campione ridotto di dati, la scansione sequenziale in memoria RAM (`COLLSCAN`) risulta paradossalmente più efficiente rispetto alla navigazione della struttura ad albero (B-Tree) dell'indice (`IXSCAN`), a causa dei tempi di lookup dei puntatori ai blocchi di memoria.
+* **Aggregazioni Intensive:** Poiché le query eseguono operazioni di raggruppamento globale (`$group`) e scompattamento di array (`$unwind`) che coinvlgono la quasi totalità dei documenti del campione, l'indice non può tagliare il costo computazionale del calcolo delle medie matematiche, il quale grava interamente sulla RAM/CPU.
+* **Scalabilità:** L'efficacia di tale indicizzazione si manifesterebbe in scenari di produzione reali su base multi-gigabyte, dove un `COLLSCAN` su disco risulterebbe distruttivo per i tempi di latenza.
+
+---
