@@ -137,3 +137,30 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+# ==========================================
+# REGOLE SPECIFICHE PER IL PROGETTO ANIME (BD2)
+# ==========================================
+
+# Escludi TUTTI i file di dati CSV (sia i giganti che i sample locali)
+*.csv
+
+# Escludi i file JSON se usati come database o dump locali pesanti
+# (Se vorrai caricare un minuscolo file di esempio, lo forzeremo a parte)
+*.json
+!report.*.json
+
+# Cache di Python (evita di caricare file precompilati inutili)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.ipynb_checkpoints/
+
+# File di configurazione dell'ambiente virtuale Python (se ne usi uno)
+venv/
+env/
+ENV/
+
+# File di sistema e temporanei (Mac e Windows)
+.DS_Store
+Thumbs.db
