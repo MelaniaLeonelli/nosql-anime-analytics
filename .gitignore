@@ -145,7 +145,6 @@ vite.config.ts.timestamp-*
 *.csv
 
 # Escludi i file JSON se usati come database o dump locali pesanti
-# (Se vorrai caricare un minuscolo file di esempio, lo forzeremo a parte)
 *.json
 !report.*.json
 
