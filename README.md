@@ -6,7 +6,7 @@ L'obiettivo è l'analisi dei dati del catalogo di MyAnimeList utilizzando un dat
 
 I dati estratti dai dataset originali di Kaggle sono stati denormalizzati e ristrutturati per sfruttare al meglio i pattern nativi di MongoDB (*Embedding* e *Referencing*).
 
-### 1. Collezione `anime`
+### 1. Collezione `animes`
 Per i generi dell'anime è stato applicato il **Pattern di Embedding**, trasformando la stringa piatta del CSV in un array di stringhe JSON. Questo permette di indicizzare e interrogare i generi in modo nativo ed efficiente.
 
 ```json
@@ -18,7 +18,7 @@ Per i generi dell'anime è stato applicato il **Pattern di Embedding**, trasform
   "studio": "David Production",
   "episodes": 12,
   "score": 7.63,
-  "genre": ["Comedy", "Supernatural", "Romance", "Shounen"],
+  "genres": ["Comedy", "Supernatural", "Romance", "Shounen"],
   "status": "Finished Airing"
 }
 ```
@@ -79,3 +79,113 @@ L'apparente peggioramento prestazionale registrato nei test evidenzia un comport
 * **Scalabilità:** L'efficacia di tale indicizzazione si manifesterebbe in scenari di produzione reali su base multi-gigabyte, dove un `COLLSCAN` su disco risulterebbe distruttivo per i tempi di latenza.
 
 ---
+
+## Issue #7: Implementazione API REST
+
+È stato implementato un backend REST in Python tramite **FastAPI**, collegato al database MongoDB `nosql_anime_analytics`.  
+Le API permettono di interrogare il catalogo anime e ottenere statistiche aggregate sui dati importati.
+
+### Obiettivo
+
+L'obiettivo dell'issue è esporre tramite endpoint HTTP alcune funzionalità del progetto:
+
+- verifica dello stato del database;
+- recupero di un anime tramite ID;
+- statistiche aggregate su generi, studi di produzione e utenti.
+
+### Tecnologie utilizzate
+
+- **FastAPI** per la definizione degli endpoint REST;
+- **Uvicorn** come server ASGI;
+- **PyMongo** per la connessione a MongoDB;
+- **bson.json_util** per la conversione dei documenti MongoDB in JSON.
+
+### Avvio del server
+
+Prima di avviare il backend, assicurarsi che MongoDB sia in esecuzione su:
+
+```text
+localhost:27017
+```
+
+Il database deve essere già stato popolato con:
+
+```bash
+python import_to_mongo.py
+```
+
+Avvio del server:
+
+```bash
+uvicorn api.main:app --reload
+```
+
+Il backend sarà disponibile su:
+
+```text
+http://127.0.0.1:8000
+```
+
+La documentazione interattiva FastAPI è disponibile su:
+
+```text
+http://127.0.0.1:8000/docs
+```
+
+### Endpoint disponibili
+
+| Metodo | Endpoint | Descrizione |
+| :--- | :--- | :--- |
+| GET | `/` | Messaggio di benvenuto |
+| GET | `/api/health` | Verifica connessione al database e collection disponibili |
+| GET | `/api/animes/{anime_id}` | Recupera un anime tramite ID |
+| GET | `/api/stats/genres` | Top 10 dei generi per voto medio |
+| GET | `/api/stats/studios` | Top 5 degli studi per episodi prodotti |
+| GET | `/api/users/locations` | Principali località degli utenti |
+
+### Test degli endpoint
+
+Gli endpoint sono stati testati localmente tramite `curl`:
+
+```bash
+curl http://127.0.0.1:8000/api/health
+curl http://127.0.0.1:8000/api/stats/genres
+curl http://127.0.0.1:8000/api/stats/studios
+curl http://127.0.0.1:8000/api/users/locations
+curl http://127.0.0.1:8000/api/animes/11013
+```
+
+Esempio di risposta dell'endpoint `/api/health`:
+
+```json
+{
+  "status": "ok",
+  "database": "nosql_anime_analytics",
+  "collections": ["studios", "users", "reviews", "animes", "watchlists"]
+}
+```
+
+Esempio di risposta dell'endpoint `/api/animes/11013`:
+
+```json
+{
+  "_id": 11013,
+  "title": "Inu x Boku SS",
+  "type": "TV",
+  "studio": "David Production",
+  "episodes": 12,
+  "score": 7.63,
+  "genres": ["Comedy", "Supernatural", "Romance", "Shounen"],
+  "status": "Finished Airing"
+}
+```
+
+### Risultato
+
+L'issue risulta completata perché il backend:
+
+- si collega correttamente a MongoDB;
+- espone più di tre endpoint REST;
+- restituisce dati in formato JSON;
+- permette di interrogare sia singoli documenti sia statistiche aggregate;
+- è stato testato localmente tramite `curl`.
