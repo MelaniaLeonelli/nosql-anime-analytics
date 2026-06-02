@@ -1,0 +1,15 @@
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.0.3, pluggy-1.6.0 -- C:\Keep Out\File\Magistrale\BD2\nosql-anime-analytics\venv\Scripts\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Keep Out\File\Magistrale\BD2\nosql-anime-analytics
+plugins: anyio-4.13.0
+collecting ... collected 6 items
+
+tests/test_api.py::test_health_check PASSED                              [ 16%]
+tests/test_api.py::test_get_existing_anime_by_id PASSED                  [ 33%]
+tests/test_api.py::test_get_non_existing_anime_returns_404 PASSED        [ 50%]
+tests/test_api.py::test_genre_stats_endpoint PASSED                      [ 66%]
+tests/test_api.py::test_studio_stats_endpoint PASSED                     [ 83%]
+tests/test_api.py::test_user_locations_endpoint PASSED                   [100%]
+
+============================== 6 passed in 1.03s ==============================

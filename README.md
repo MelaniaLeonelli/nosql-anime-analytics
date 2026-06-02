@@ -189,3 +189,68 @@ L'issue risulta completata perché il backend:
 - restituisce dati in formato JSON;
 - permette di interrogare sia singoli documenti sia statistiche aggregate;
 - è stato testato localmente tramite `curl`.
+
+---
+
+## Issue #8: Test automatizzati API REST
+
+Sono stati aggiunti test automatizzati per verificare il corretto funzionamento degli endpoint REST implementati con FastAPI.
+
+### Obiettivo
+
+L'obiettivo dell'issue è validare gli endpoint principali del backend, controllando:
+
+- codice HTTP restituito;
+- struttura JSON della risposta;
+- presenza dei campi attesi;
+- gestione dell'errore per un anime inesistente.
+
+### Tecnologie utilizzate
+
+- **pytest** per l'esecuzione della suite di test;
+- **requests** per effettuare chiamate HTTP agli endpoint REST.
+
+### Avvio dei test
+
+Prima di eseguire i test è necessario avere MongoDB attivo e il server API in esecuzione.
+
+Avviare il backend:
+
+```bash
+uvicorn api.main:app --reload
+```
+
+In un secondo terminale eseguire:
+
+```bash
+pytest tests/test_api.py -v
+```
+
+### Endpoint testati
+
+| Endpoint | Verifica |
+|---|---|
+| `/api/health` | Controllo stato database e collection disponibili |
+| `/api/animes/11013` | Recupero corretto di un anime esistente |
+| `/api/animes/999999999` | Gestione errore `404 Not Found` per anime inesistente |
+| `/api/stats/genres` | Verifica risposta JSON delle statistiche sui generi |
+| `/api/stats/studios` | Verifica risposta JSON delle statistiche sugli studi |
+| `/api/users/locations` | Verifica risposta JSON delle statistiche sugli utenti |
+
+### Output dei test
+
+L'output dell'esecuzione dei test è stato salvato in:
+
+```text
+test_outputs/api_tests_output.txt
+```
+
+Risultato verificato:
+
+```text
+6 passed
+```
+
+### Risultato
+
+La suite di test verifica più di tre endpoint REST e controlla sia risposte corrette sia gestione degli errori.
