@@ -254,3 +254,29 @@ Risultato verificato:
 ### Risultato
 
 La suite di test verifica più di tre endpoint REST e controlla sia risposte corrette sia gestione degli errori.
+
+---
+
+## Issue #9: Containerizzazione dell'Ecosistema tramite Docker
+
+Per garantire la massima portabilità del software, l'isolamento dei componenti ed eliminare l'accoppiamento con le configurazioni degli ambienti locali, l'intera architettura del progetto è stata completamente containerizzata utilizzando **Docker** e **Docker Compose**.
+
+### Architettura Multi-Container e Flusso di Rete
+
+L'infrastruttura è orchestrata in modo dichiarativo e si divide in due servizi principali che comunicano all'interno di una rete virtuale isolata creata da Docker:
+
+1. **`database` (NoSQL Engine):** * Basato sull'immagine ufficiale `mongo:latest`.
+   * Espone la porta standard `27017` verso l'esterno per consentire ispezioni manuali tramite strumenti come MongoDB Compass.
+   * Gestisce la persistenza dei dati attraverso un volume Docker denominato `mongo_data` mappato sulla directory interna `/data/db`. In questo modo, i dati caricati rimangono persistenti sul disco host anche in caso di spegnimento, rimozione o aggiornamento dei container.
+
+2. **`backend` (REST API Service):**
+   * Configurato tramite un `Dockerfile` personalizzato basato sull'immagine Linux leggera `python:3.11-slim`.
+   * Il processo di build si occupa di copiare il manifest delle dipendenze (`requirements.txt`), installare i pacchetti necessari senza memorizzare la cache di pip (riducendo il peso dell'immagine) e copiare il codice sorgente dell'applicazione.
+   * Espone la porta `8000` per ricevere le chiamate HTTP dall'host.
+   * La connessione al database avviene in modo dinamico leggendo la variabile d'ambiente `MONGO_URI=mongodb://database:27017/`. Il backend attende l'avvio del database grazie alla direttiva `depends_on`.
+
+### Guida al Deployment Rapido
+
+Grazie all'orchestrazione con Docker Compose, non è necessario installare localmente né l'istanza di MongoDB Server né l'interprete Python con le relative librerie. L'intero ecosistema si avvia con un singolo comando:
+
+```bash
