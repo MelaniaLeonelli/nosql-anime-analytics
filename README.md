@@ -280,3 +280,8 @@ L'infrastruttura è orchestrata in modo dichiarativo e si divide in due servizi 
 Grazie all'orchestrazione con Docker Compose, non è necessario installare localmente né l'istanza di MongoDB Server né l'interprete Python con le relative librerie. L'intero ecosistema si avvia con un singolo comando:
 
 ```bash
+# Clonare il repository e posizionarsi nella root directory
+cd nosql-anime-analytics
+
+# Avviare il boot dei container
+docker-compose up --build
