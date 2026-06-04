@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  # --- SERVIZIO 1: IL DATABASE NOSQL ---
+  database:
+    image: mongo:latest
+    container_name: anime_mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db # Mantiene i dati salvati anche se spegni il container
+
+  # --- SERVIZIO 2: IL BACKEND (REST API) ---
+  backend:
+    build: . # Dice a Docker di usare il Dockerfile presente in questa cartella
+    container_name: anime_backend_api
+    ports:
+      - "8000:8000"
+    environment:
+      - MONGO_URI=mongodb://database:27017/ # Fornisce la rotta per connettersi al container del DB
+    depends_on:
+      - database # Accende il database PRIMA di avviare le API
+
+volumes:
+  mongo_data: # Definizione del volume per la persistenza dei dati
