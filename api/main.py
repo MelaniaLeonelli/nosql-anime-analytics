@@ -7,7 +7,9 @@ app = FastAPI(title="NoSQL Anime Analytics API")
 
 
 def get_db():
-    client = MongoClient("mongodb://localhost:27017/")
+    # Legge la URI di Docker se esiste, altrimenti usa localhost come fallback
+    mongo_uri = os.environ.get("MONGO_URI", "mongodb://localhost:27017/")
+    client = MongoClient(mongo_uri)
     return client["nosql_anime_analytics"]
 
 
