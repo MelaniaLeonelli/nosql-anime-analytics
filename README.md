@@ -297,3 +297,25 @@ docker-compose up --build
 2. Popolare il database NoSQL locale (richiede Pandas e PyMongo): `python seed.py`
 3. Avviare il frontend Streamlit in locale: `streamlit run app.py`
 4. Navigare all'indirizzo `http://localhost:8501` e verificare il caricamento delle dashboard
+
+# NoSQL Anime Analytics
+
+Applicazione web multi-pagina basata su architettura a microservizi per l'analisi e l'esplorazione di dati estratti da MyAnimeList. Il sistema utilizza MongoDB come database NoSQL per la gestione flessibile dei record, FastAPI per l'esposizione delle API di backend e Streamlit per l'interfaccia utente finale.
+
+## Struttura del Progetto
+
+```text
+nosql-anime-analytics/
+│
+├── api/
+│   ├── main.py              # Logica del backend FastAPI e route API
+│   └── Dockerfile           # Configurazione Docker per il container del backend
+│
+├── frontend/
+│   ├── Home.py              # Pagina principale Streamlit (Catalogo e Ricerca)
+│   └── pages/
+│       └── Analytics.py     # Pagina analitica con grafici Plotly
+│
+├── docker-compose.yml       # Orchestrazione dei container (Backend e MongoDB)
+└── README.md                # Documentazione del progetto
+```
