@@ -286,13 +286,13 @@ cd nosql-anime-analytics
 # Avviare il boot dei container
 docker-compose up --build
 ```
-###Cosa cambia
+##Cosa cambia
 * Creata interfaccia interattiva tramite Streamlit con 3 tab di analisi.
 * Integrati grafici Plotly (Bar Chart, Bubble Chart, Donut Chart) collegati agli endpoint FastAPI.
 * Creato script di automazione `seed.py` per pulire i CSV (gestione NaN, trasformazione stringa in array per il campo `genres`) e popolare massivamente le 5 collezioni di MongoDB.
 * Aggiunte istruzioni di setup e avvio aggiornate nel README.
 
-###Come testare (Checklist)
+##Come testare (Checklist)
 1. Avviare l'infrastruttura backend: `docker-compose up -d --build`
 2. Popolare il database NoSQL locale (richiede Pandas e PyMongo): `python seed.py`
 3. Avviare il frontend Streamlit in locale: `streamlit run app.py`
