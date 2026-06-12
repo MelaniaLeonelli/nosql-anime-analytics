@@ -1,4 +1,4 @@
-version: '3.8'
+
 
 services:
   # --- SERVIZIO 1: IL DATABASE NOSQL ---
