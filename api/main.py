@@ -1,3 +1,4 @@
+import os
 from fastapi import FastAPI, HTTPException
 from pymongo import MongoClient
 from bson import json_util
