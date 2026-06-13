@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
+import os
 
 # 1. Configurazione della pagina dell'applicazione web
 st.set_page_config(page_title="NoSQL Anime Analytics", layout="wide", page_icon="deku.png")
@@ -10,7 +11,8 @@ st.title("NoSQL Anime Analytics Dashboard")
 st.markdown("---")
 
 # 2. Configurazione dell'URL del Backend (il container Docker delle API)
-BACKEND_URL = "http://localhost:8000"
+#BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
 # 3. Sidebar per il monitoraggio dello stato dell'infrastruttura
 st.sidebar.header("🛠️ Infrastruttura")

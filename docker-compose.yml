@@ -21,5 +21,18 @@ services:
     depends_on:
       - database # Accende il database PRIMA di avviare le API
 
+    # --- SERVIZIO 3: IL FRONTEND STREAMLIT ---
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: anime_frontend_streamlit
+    ports:
+      - "8501:8501"
+    environment:
+      - BACKEND_URL=http://backend:8000
+    depends_on:
+      - backend
+
 volumes:
   mongo_data: # Definizione del volume per la persistenza dei dati

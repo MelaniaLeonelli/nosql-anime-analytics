@@ -1,0 +1,5 @@
+CONTAINER ID   IMAGE                            COMMAND                   CREATED          STATUS          PORTS                                             NAMES
+6dc835e6ef27   nosql-anime-analytics-frontend   "streamlit run app.p…"   19 minutes ago   Up 19 minutes   0.0.0.0:8501->8501/tcp, [::]:8501->8501/tcp       anime_frontend_streamlit
+aaf82fbd7bcc   nosql-anime-analytics-backend    "uvicorn api.main:ap…"   19 minutes ago   Up 19 minutes   0.0.0.0:8000->8000/tcp, [::]:8000->8000/tcp       anime_backend_api
+59fe388a539a   mongo:latest                     "docker-entrypoint.s…"   19 minutes ago   Up 19 minutes   0.0.0.0:27017->27017/tcp, [::]:27017->27017/tcp   anime_mongodb
+{"status":"ok","database":"nosql_anime_analytics","collections":["animelists","animes","studios","users","reviews"]}

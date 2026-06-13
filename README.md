@@ -393,3 +393,101 @@ L'issue risulta completata perché:
 - il Data Warehouse SQLite viene creato automaticamente;
 - i dati vengono estratti da MongoDB e caricati nel modello relazionale;
 - i conteggi di validazione vengono stampati e salvati in un file di log.
+
+---
+
+## Issue #14: Integrazione Frontend in Docker Compose
+
+Il frontend Streamlit è stato integrato nell'orchestrazione Docker Compose del progetto, insieme al database MongoDB e al backend FastAPI.
+
+### Obiettivo
+
+L'obiettivo dell'issue è permettere l'avvio dell'intera architettura applicativa con un unico comando, includendo:
+
+- database MongoDB;
+- backend REST API FastAPI;
+- frontend Streamlit.
+
+### File aggiunti/modificati
+
+| File | Descrizione |
+|---|---|
+| `Dockerfile.frontend` | Dockerfile dedicato al frontend Streamlit |
+| `docker-compose.yml` | Aggiunta del servizio `frontend` |
+| `requirements-frontend.txt` | Dipendenze necessarie per il frontend |
+| `app.py` | Lettura della variabile `BACKEND_URL` |
+| `pages/analytics.py` | Lettura della variabile `BACKEND_URL` e uniformazione della sidebar |
+
+### Avvio dell'architettura
+
+Assicurarsi che Docker Desktop sia avviato.
+
+Eseguire:
+
+```bash
+docker compose up -d --build
+```
+
+oppure:
+
+```bash
+docker-compose up -d --build
+```
+
+### Popolamento del database
+
+Dopo l'avvio dei container, popolare MongoDB:
+
+```bash
+python seed.py
+```
+
+oppure:
+
+```bash
+python import_to_mongo.py
+```
+
+### Endpoint e interfacce
+
+Backend API:
+
+```text
+http://localhost:8000
+```
+
+Documentazione API:
+
+```text
+http://localhost:8000/docs
+```
+
+Frontend Streamlit:
+
+```text
+http://localhost:8501
+```
+
+### Validazione
+
+Per verificare i container:
+
+```bash
+docker ps
+```
+
+Per verificare il backend:
+
+```bash
+curl http://127.0.0.1:8000/api/health
+```
+
+L'output di validazione è stato salvato in:
+
+```text
+test_outputs/docker_compose_output.txt
+```
+
+### Risultato
+
+L'issue risulta completata perché il frontend Streamlit è stato integrato nel cluster Docker Compose e comunica con il backend FastAPI tramite il nome del servizio `backend` nella rete Docker.
