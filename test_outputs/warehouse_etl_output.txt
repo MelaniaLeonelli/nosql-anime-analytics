@@ -1,0 +1,29 @@
+Caricamento dimensione studi...
+Caricamento dimensione anime...
+Caricamento dimensione utenti...
+Caricamento tabella dei fatti reviews...
+======================================================================
+ETL DATA WAREHOUSE COMPLETATA
+======================================================================
+Database SQLite creato: C:\Keep Out\File\Magistrale\BD2\nosql-anime-analytics\warehouse\anime_dw.sqlite
+
+Conteggi sorgente MongoDB:
+- animes: 6668
+- users: 99999
+- studios: 711
+- reviews: 15000
+
+Conteggi Data Warehouse SQLite:
+- dim_anime: 6668
+- dim_user: 99999
+- dim_studio: 711
+- fact_reviews: 15000
+
+Validazioni:
+- Anime caricati: 6668 / 6668
+- Utenti caricati: 99999 / 99999
+- Review caricate nella fact table: 15000 / 15000
+- Review saltate per anime mancante: 0
+- Review saltate per utente mancante: 0
+
+ESITO VALIDAZIONE: OK

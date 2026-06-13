@@ -163,3 +163,7 @@ ENV/
 # File di sistema e temporanei (Mac e Windows)
 .DS_Store
 Thumbs.db
+
+#Esclude file generati da warehouse
+warehouse/*.sqlite
+warehouse/*.db

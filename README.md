@@ -319,3 +319,77 @@ nosql-anime-analytics/
 ├── docker-compose.yml       # Orchestrazione dei container (Backend e MongoDB)
 └── README.md                # Documentazione del progetto
 ```
+
+---
+
+## Issue #18: Pipeline ETL verso Data Warehouse con Schema a Stella
+
+È stata implementata una pipeline ETL che estrae i dati dal database MongoDB `nosql_anime_analytics`, li trasforma in un modello relazionale denormalizzato e li carica in un Data Warehouse SQLite basato su **Schema a Stella**.
+
+### Obiettivo
+
+L'obiettivo dell'issue è costruire un Data Warehouse relazionale di appoggio per analisi OLAP-like sui dati MyAnimeList, partendo dalle collection MongoDB già popolate.
+
+### Schema a Stella
+
+Il modello è composto da tre tabelle dimensionali e una tabella dei fatti:
+
+| Tabella | Tipo | Descrizione |
+|---|---|---|
+| `dim_anime` | Dimensione | Contiene le informazioni descrittive degli anime |
+| `dim_user` | Dimensione | Contiene le informazioni principali degli utenti |
+| `dim_studio` | Dimensione | Contiene le informazioni sugli studi di produzione |
+| `fact_reviews` | Fatto | Contiene le recensioni e collega anime, utenti e studi |
+
+La tabella `fact_reviews` contiene le metriche derivate dalle recensioni, tra cui lo score assegnato dall'utente.
+
+### File aggiunti
+
+| File | Descrizione |
+|---|---|
+| `warehouse/dw_schema.sql` | Definizione dello schema relazionale del Data Warehouse |
+| `warehouse/etl_to_warehouse.py` | Script ETL da MongoDB a SQLite |
+| `test_outputs/warehouse_etl_output.txt` | Log di validazione dell'esecuzione ETL |
+
+### Esecuzione della pipeline
+
+Prima di eseguire la pipeline è necessario avere MongoDB attivo e popolato.
+
+Eseguire:
+
+```bash
+python warehouse/etl_to_warehouse.py
+```
+
+Lo script crea il database SQLite:
+
+```text
+warehouse/anime_dw.sqlite
+```
+
+### Salvataggio del log
+
+Per salvare il log di validazione:
+
+```bash
+python warehouse/etl_to_warehouse.py > test_outputs/warehouse_etl_output.txt
+```
+
+### Validazioni effettuate
+
+La pipeline stampa e salva:
+
+- conteggio dei documenti sorgente in MongoDB;
+- conteggio dei record caricati nelle dimensioni;
+- conteggio dei record caricati nella tabella dei fatti;
+- numero di review saltate per riferimenti mancanti;
+- esito finale della validazione.
+
+### Risultato
+
+L'issue risulta completata perché:
+
+- lo schema a stella è stato progettato;
+- il Data Warehouse SQLite viene creato automaticamente;
+- i dati vengono estratti da MongoDB e caricati nel modello relazionale;
+- i conteggi di validazione vengono stampati e salvati in un file di log.
