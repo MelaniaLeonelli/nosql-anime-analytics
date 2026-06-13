@@ -2,37 +2,39 @@ import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
+import os
 
 st.set_page_config(page_title="NoSQL Anime Analytics", layout="wide", page_icon="deku.png")
 
 # Custom CSS per uniformare il layout delle pagine
-st.markdown(
-    """
-    <style>
-        [data-testid="stSidebarNavItems"] a span {
-            font-size: 24px !important;
-            font-weight: bold !important;
-        }
-        [data-testid="stSidebarNavItems"] li {
-            padding-top: 10px !important;
-            padding-bottom: 10px !important;
-        }
-        .sidebar-spacer {
-            margin-top: 150px;
-        }
-    </style>
-    """,
-    unsafe_allow_html=True
-)
+# st.markdown(
+#     """
+#     <style>
+#         [data-testid="stSidebarNavItems"] a span {
+#             font-size: 24px !important;
+#             font-weight: bold !important;
+#         }
+#         [data-testid="stSidebarNavItems"] li {
+#             padding-top: 10px !important;
+#             padding-bottom: 10px !important;
+#         }
+#         .sidebar-spacer {
+#             margin-top: 150px;
+#         }
+#     </style>
+#     """,
+#     unsafe_allow_html=True
+# )
 
 st.title("Dashboard Analitica Globale")
 st.markdown("Analisi aggregate calcolate in tempo reale tramite le Aggregation Pipeline di MongoDB.")
 st.markdown("---")
 
-BACKEND_URL = "http://localhost:8000"
+#BACKEND_URL = "http://localhost:8000"
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
 
-st.sidebar.markdown('<div class="sidebar-spacer"></div>', unsafe_allow_html=True)
-st.sidebar.header("Infrastruttura")
+#st.sidebar.markdown('<div class="sidebar-spacer"></div>', unsafe_allow_html=True)
+st.sidebar.header("🛠️ Infrastruttura")
 try:
     api_check = requests.get(f"{BACKEND_URL}/api/health", timeout=2)
     if api_check.status_code == 200:
@@ -41,9 +43,9 @@ except Exception:
     st.sidebar.error("API Backend: OFFLINE")
 
 tab_generi, tab_studios, tab_utenti = st.tabs([
-    "Analisi Generi", 
-    "Performance Studi", 
-    "Distribuzione Utenti"
+    "📊 Analisi Generi", 
+    "🏢 Performance Studi", 
+    "🌍 Distribuzione Utenti"
 ])
 
 # --- TAB 1: ANALISI GENERI ---
