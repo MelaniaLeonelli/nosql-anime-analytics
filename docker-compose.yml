@@ -20,7 +20,8 @@ services:
       - MONGO_URI=mongodb://database:27017/ # Fornisce la rotta per connettersi al container del DB
     depends_on:
       - database # Accende il database PRIMA di avviare le API
-
+    command: >
+      sh -c "sed -i 's/localhost:27017/database:27017/g' seed.py && python seed.py && uvicorn api.main:app --host 0.0.0.0 --port 8000"
     # --- SERVIZIO 3: IL FRONTEND STREAMLIT ---
   frontend:
     build:

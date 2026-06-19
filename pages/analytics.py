@@ -6,25 +6,22 @@ import os
 
 st.set_page_config(page_title="NoSQL Anime Analytics", layout="wide", page_icon="deku.png")
 
-# Custom CSS per uniformare il layout delle pagine
-# st.markdown(
-#     """
-#     <style>
-#         [data-testid="stSidebarNavItems"] a span {
-#             font-size: 24px !important;
-#             font-weight: bold !important;
-#         }
-#         [data-testid="stSidebarNavItems"] li {
-#             padding-top: 10px !important;
-#             padding-bottom: 10px !important;
-#         }
-#         .sidebar-spacer {
-#             margin-top: 150px;
-#         }
-#     </style>
-#     """,
-#     unsafe_allow_html=True
-# )
+st.markdown(
+    """
+    <style>
+        [data-testid="stSidebarNavItems"] a span {
+            font-size: 24px !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important; /* Forza il maiuscolo */
+        }
+        [data-testid="stSidebarNavItems"] li {
+            padding-top: 10px !important;
+            padding-bottom: 10px !important;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
 
 st.title("Dashboard Analitica Globale")
 st.markdown("Analisi aggregate calcolate in tempo reale tramite le Aggregation Pipeline di MongoDB.")

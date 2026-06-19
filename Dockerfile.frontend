@@ -7,9 +7,9 @@ COPY requirements-frontend.txt .
 RUN pip install --no-cache-dir -r requirements-frontend.txt
 
 COPY app.py .
-COPY home.py .
 COPY deku.png .
 COPY pages ./pages
+
 
 EXPOSE 8501
 
