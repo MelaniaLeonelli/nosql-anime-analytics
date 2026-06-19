@@ -1,150 +1,118 @@
 import streamlit as st
 import requests
 import pandas as pd
-import plotly.express as px
-import os
 
-# 1. Configurazione della pagina dell'applicazione web
-st.set_page_config(page_title="NoSQL Anime Analytics", layout="wide", page_icon="deku.png")
+st.set_page_config(page_title="NoSQL Anime Home", layout="wide", page_icon="deku.png")
 
-st.title("NoSQL Anime Analytics Dashboard")
+# Custom CSS per la sidebar - Grafica MAIUSCOLA ripristinata
+st.markdown(
+    """
+    <style>
+        [data-testid="stSidebarNavItems"] a span {
+            font-size: 24px !important;
+            font-weight: bold !important;
+            text-transform: uppercase !important; /* Forza la sidebar in maiuscolo */
+        }
+        [data-testid="stSidebarNavItems"] li {
+            padding-top: 10px !important;
+            padding-bottom: 10px !important;
+        }
+        .sidebar-spacer {
+            margin-top: 150px;
+        }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+st.title("Catalogo Esplorativo Anime")
+st.markdown("Esplora l'intero catalogo estratto da MyAnimeList, effettua ricerche testuali avanzate e naviga i blocchi di dati.")
 st.markdown("---")
 
-# 2. Configurazione dell'URL del Backend (il container Docker delle API)
-#BACKEND_URL = "http://localhost:8000"
-BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8000")
+# Corretto l'URL per la comunicazione tra container nella rete di Docker
+BACKEND_URL = "http://anime_backend_api:8000"
 
-# 3. Sidebar per il monitoraggio dello stato dell'infrastruttura
-st.sidebar.header("🛠️ Infrastruttura")
+st.sidebar.markdown('<div class="sidebar-spacer"></div>', unsafe_allow_html=True)
+st.sidebar.header("Infrastruttura")
 try:
-    # Facciamo un tentativo di chiamata all'endpoint di health check
     api_check = requests.get(f"{BACKEND_URL}/api/health", timeout=2)
     if api_check.status_code == 200:
-        st.sidebar.success("🟢 API Backend: ONLINE")
+        st.sidebar.success("API Backend: ONLINE")
 except Exception:
-    st.sidebar.error("🔴 API Backend: OFFLINE")
-    st.sidebar.warning("Assicurati che i container Docker siano avviati con 'docker-compose up'")
+    st.sidebar.error("API Backend: OFFLINE")
 
-# 4. Creazione dei Tab organizzati per la visualizzazione delle metriche
-tab_generi, tab_studios, tab_utenti = st.tabs([
-    "📊 Analisi Generi", 
-    "🏢 Performance Studi", 
-    "🌍 Distribuzione Utenti"
-])
+if "current_page" not in st.session_state:
+    st.session_state.current_page = 1
 
-# --- TAB 1: ANALISI GENERI ---
-with tab_generi:
-    st.header("I Generi di Anime più Apprezzati")
+col_search, col_sort, col_limit = st.columns([2, 1, 1])
+
+with col_search:
+    # Modificato il testo per rispecchiare la nuova ricerca parziale Regex
+    search_query = st.text_input("Cerca un anime per titolo (anche parziale)...", key="search_input")
+
+with col_sort:
+    sort_labels = {"Voto più alto": "score", "Ordine alfabetico": "title"}
+    user_choice = st.selectbox("Ordina per:", list(sort_labels.keys()), index=0)
+    sort_option = sort_labels[user_choice]
+
+with col_limit:
+    limit_option = st.slider("Elementi per pagina:", min_value=10, max_value=50, value=20, step=10)
+
+if "last_query" not in st.session_state or st.session_state.last_query != search_query or st.session_state.last_sort != sort_option or st.session_state.last_limit != limit_option:
+    st.session_state.current_page = 1
+    st.session_state.last_query = search_query
+    st.session_state.last_sort = sort_option
+    st.session_state.last_limit = limit_option
+
+try:
+    params = {
+        "q": search_query if search_query else None,
+        "page": st.session_state.current_page,
+        "limit": limit_option,
+        "sort_by": sort_option
+    }
     
-    try:
-        with st.spinner("Caricamento dati da MongoDB..."):
-            response = requests.get(f"{BACKEND_URL}/api/stats/genres", timeout=5)
+    with st.spinner("Recupero record da MongoDB..."):
+        response = requests.get(f"{BACKEND_URL}/api/anime/catalog", params=params, timeout=5)
         
-        if response.status_code == 200:
-            genres_data = response.json()
-            df_genres = pd.DataFrame(genres_data)
-            
-            if not df_genres.empty:
-                # Usa i nomi esatti proiettati dal backend
-                fig = px.bar(
-                    df_genres, 
-                    x="genere", 
-                    y="total_anime",
-                    title="Top 10 Generi (Voto Medio più Alto)",
-                    labels={"total_anime": "Totale Anime", "genere": "Genere Anime", "voto_medio": "Voto Medio"},
-                    color="voto_medio",
-                    color_continuous_scale=px.colors.sequential.Plasma,
-                    hover_data=["voto_medio"]
-                )
-                
-                st.plotly_chart(fig, use_container_width=True)
-                
-                with st.expander("🔍 Visualizza i dati tabellari grezzi"):
-                    st.dataframe(df_genres, use_container_width=True)
-            else:
-                st.warning("Il database è vuoto o non ha restituito dati per i generi.")
-        else:
-            st.error(f"Errore del server API: Codice {response.status_code}")
-            
-    except Exception as e:
-        st.error(f"Impossibile renderizzare il grafico: {str(e)}")
-
-# --- TAB 2: PERFORMANCE STUDI ---
-with tab_studios:
-    st.header("Classifica degli Studi di Animazione")
-    
-    try:
-        with st.spinner("Recupero dati degli studi..."):
-            resp_studios = requests.get(f"{BACKEND_URL}/api/stats/studios", timeout=5)
+    if response.status_code == 200:
+        catalog_data = response.json()
+        total_anime = catalog_data["total"]
+        results = catalog_data["results"]
         
-        if resp_studios.status_code == 200:
-            df_studios = pd.DataFrame(resp_studios.json())
-            
-            if not df_studios.empty:
-                # Creiamo un Bubble Chart altamente professionale
-                fig_studios = px.scatter(
-                    df_studios, 
-                    x="studio", 
-                    y="totale_episodi",
-                    size="anime_prodotti", 
-                    color="voto_medio_studio",
-                    hover_name="studio", 
-                    size_max=60,
-                    title="Top 5 Studi: Volume di Produzione vs Qualità",
-                    labels={
-                        "totale_episodi": "Totale Episodi", 
-                        "voto_medio_studio": "Voto Medio", 
-                        "anime_prodotti": "Anime Prodotti",
-                        "studio": "Studio di Animazione"
-                    },
-                    color_continuous_scale=px.colors.sequential.Viridis
-                )
-                
-                st.plotly_chart(fig_studios, use_container_width=True)
-                
-                with st.expander("🔍 Visualizza i dati tabellari grezzi"):
-                    st.dataframe(df_studios, use_container_width=True)
-            else:
-                st.warning("Nessun dato trovato per gli studi.")
-        else:
-            st.error(f"Errore del server API: Codice {resp_studios.status_code}")
-            
-    except Exception as e:
-        st.error(f"Impossibile renderizzare il grafico: {str(e)}")
+        total_pages = (total_anime // limit_option) + (1 if total_anime % limit_option > 0 else 0)
+        if total_pages == 0: total_pages = 1
 
+        st.metric(label="Totale Anime Trovati", value=f"{total_anime:,}")
 
-# --- TAB 3: DISTRIBUZIONE UTENTI ---
-with tab_utenti:
-    st.header("Geolocalizzazione della Fanbase")
-    
-    try:
-        with st.spinner("Mappatura utenti in corso..."):
-            resp_users = requests.get(f"{BACKEND_URL}/api/users/locations", timeout=5)
-        
-        if resp_users.status_code == 200:
-            df_users = pd.DataFrame(resp_users.json())
+        if results:
+            df_catalog = pd.DataFrame(results)
+            available_cols = ["title", "type", "score", "genres", "studio", "episodes", "synopsis"]
+            cols_to_show = [c for c in available_cols if c in df_catalog.columns]
             
-            if not df_users.empty:
-                # Creiamo un Donut Chart elegante
-                fig_users = px.pie(
-                    df_users, 
-                    values="utenti_in_location", 
-                    names="localita",
-                    title="Top 5 Località per Concentrazione Utenti",
-                    hole=0.4,  # Questo trasforma la torta in una ciambella
-                    hover_data=["score_medio_location"]
-                )
+            st.dataframe(df_catalog[cols_to_show], use_container_width=True, height=500)
+            
+            st.markdown("---")
+            col_prev, col_info, col_next = st.columns([1, 2, 1])
+            
+            def go_prev():
+                st.session_state.current_page -= 1
+
+            def go_next():
+                st.session_state.current_page += 1
+            
+            with col_prev:
+                st.button("Precedente", disabled=(st.session_state.current_page == 1), on_click=go_prev)
+                    
+            with col_info:
+                st.markdown(f"<p style='text-align: center;'>Pagina <b>{st.session_state.current_page}</b> di <b>{total_pages}</b></p>", unsafe_allow_html=True)
                 
-                fig_users.update_traces(textposition='inside', textinfo='percent+label')
-                
-                st.plotly_chart(fig_users, use_container_width=True)
-                
-                with st.expander("🔍 Visualizza i dati tabellari grezzi"):
-                    st.dataframe(df_users, use_container_width=True)
-            else:
-                st.warning("Nessun dato trovato per gli utenti.")
+            with col_next:
+                st.button("Successiva", disabled=(st.session_state.current_page >= total_pages), on_click=go_next)
         else:
-            st.error(f"Errore del server API: Codice {resp_users.status_code}")
-            
-    except Exception as e:
-        st.error(f"Impossibile renderizzare il grafico: {str(e)}")
+            st.warning("Nessun anime corrisponde ai criteri di ricerca inseriti.")
+    else:
+        st.error(f"Errore del backend: Codice {response.status_code}")
+
+except Exception as e:
+    st.error(f"Errore di connessione o rendering: {str(e)}")
