@@ -124,13 +124,25 @@ def load_dim_anime(conn, mongo_db):
     cursor = conn.cursor()
 
     for anime in mongo_db["animes"].find({}):
-        anime_id = to_int(anime.get("_id"))
-        title = clean_value(anime.get("title"))
+        anime_id = to_int(anime.get("anime_id"))
+
+        if anime_id is None:
+            anime_id = to_int(anime.get("_id"))
+
+        title = clean_value(
+            anime.get("title")
+            or anime.get("name")
+            or anime.get("anime_title")
+        )
 
         if anime_id is None or not title:
             continue
 
         genres = anime.get("genres", [])
+
+        if not genres and anime.get("genre"):
+            genres = anime.get("genre")
+
         if isinstance(genres, list):
             genres_text = ", ".join(str(genre) for genre in genres)
         else:
@@ -154,7 +166,7 @@ def load_dim_anime(conn, mongo_db):
                 anime_id,
                 str(title),
                 clean_value(anime.get("type")),
-                clean_value(anime.get("studio")),
+                clean_value(anime.get("studio") or anime.get("studio_name")),
                 to_int(anime.get("episodes")),
                 to_float(anime.get("score")),
                 genres_text,
@@ -169,7 +181,11 @@ def load_dim_user(conn, mongo_db):
     cursor = conn.cursor()
 
     for user in mongo_db["users"].find({}):
-        username = clean_value(user.get("_id"))
+        username = clean_value(
+            user.get("username")
+            or user.get("user_name")
+            or user.get("profile")
+        )
 
         if not username:
             continue

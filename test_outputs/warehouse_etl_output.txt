@@ -9,21 +9,21 @@ Database SQLite creato: C:\Keep Out\File\Magistrale\BD2\nosql-anime-analytics\wa
 
 Conteggi sorgente MongoDB:
 - animes: 6668
-- users: 99999
+- users: 100000
 - studios: 711
 - reviews: 15000
 
 Conteggi Data Warehouse SQLite:
-- dim_anime: 6668
-- dim_user: 99999
+- dim_anime: 0
+- dim_user: 100000
 - dim_studio: 711
-- fact_reviews: 15000
+- fact_reviews: 0
 
 Validazioni:
-- Anime caricati: 6668 / 6668
-- Utenti caricati: 99999 / 99999
-- Review caricate nella fact table: 15000 / 15000
-- Review saltate per anime mancante: 0
+- Anime caricati: 0 / 6668
+- Utenti caricati: 100000 / 100000
+- Review caricate nella fact table: 0 / 15000
+- Review saltate per anime mancante: 15000
 - Review saltate per utente mancante: 0
 
-ESITO VALIDAZIONE: OK
+ESITO VALIDAZIONE: ATTENZIONE - dimensioni vuote
